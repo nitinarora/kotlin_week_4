@@ -2,27 +2,59 @@ package rationals
 
 import java.math.BigInteger
 
-data class Rational(val numerator: BigInteger, val denominator: BigInteger)
+data class Rational(val numerator: BigInteger, val denominator: BigInteger) {
+    override fun toString(): String = numerator.toString() + "/" + denominator.toString()
+}
 
-infix fun Int.divBy(other: Int):Rational = Rational(this.toBigInteger(), other.toBigInteger())
+infix fun Number.divBy(other: Number): Rational = Rational(this as BigInteger, other as BigInteger)
 
-fun hcf(first: BigInteger, second: BigInteger):BigInteger {
+fun String.toRational(): Rational =
+        Rational(substringBefore('/').toBigInteger(), substringAfter('/').toBigInteger())
+
+fun hcf(first: BigInteger, second: BigInteger): BigInteger {
     if (second != BigInteger.ZERO)
         return (hcf(second, first % second))
     else
         return first
 }
 
+fun lcm(first: BigInteger, second: BigInteger): BigInteger = (first * second) / hcf(first, second)
+
 fun normalize(r: Rational): Rational {
     val hcf = hcf(r.numerator, r.denominator)
-    return Rational(r.numerator/hcf, r.denominator/hcf)
+    return Rational(r.numerator / hcf, r.denominator / hcf)
 }
 
-operator fun Rational.plus(other: Rational) : Rational {
+operator fun Rational.plus(other: Rational): Rational {
     val leftSide = normalize(this)
     val rightSide = normalize(other)
 
-    if
+    val leftDenominator = leftSide.denominator
+    val rightDenominator = rightSide.denominator
+
+    val lcmDenominators = lcm(leftDenominator, rightDenominator)
+
+    val factorLeft = lcmDenominators / leftDenominator
+    val factorRight = lcmDenominators / rightDenominator
+
+    return normalize(Rational((leftSide.numerator * factorLeft) + (rightSide.numerator * factorRight),
+            lcmDenominators))
+}
+
+operator fun Rational.minus(other: Rational): Rational {
+    val leftSide = normalize(this)
+    val rightSide = normalize(other)
+
+    val leftDenominator = leftSide.denominator
+    val rightDenominator = rightSide.denominator
+
+    val lcmDenominators = lcm(leftDenominator, rightDenominator)
+
+    val factorLeft = lcmDenominators / leftDenominator
+    val factorRight = lcmDenominators / rightDenominator
+
+    return normalize(Rational((leftSide.numerator * factorLeft) - (rightSide.numerator * factorRight),
+            lcmDenominators))
 }
 
 fun main() {
