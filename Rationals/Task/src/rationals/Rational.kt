@@ -2,7 +2,30 @@ package rationals
 
 import java.math.BigInteger
 
-data class Rational(val numerator: BigInteger, val denominator: BigInteger) {
+data class Rational(var numerator: BigInteger, var denominator: BigInteger): Comparable<Rational> {
+    init {
+        when {
+            denominator < BigInteger.ZERO -> {
+                numerator = -numerator
+                denominator = -denominator
+            }
+        }
+    }
+
+    override fun compareTo(other: Rational): Int {
+        var (thisNum, thisDenom) = normalize(this)
+        var (otherNum, otherDenom) = normalize(other)
+
+        val lcm = lcm(thisDenom, otherDenom)
+        val factorThis = lcm / thisDenom
+        val factorOther = lcm / otherDenom
+
+        thisNum *= factorThis
+        otherNum *= factorOther
+
+        return thisNum.compareTo(otherNum)
+    }
+
     override fun toString(): String {
 
         val (normNumerator, normDenominator) = normalize(this)
@@ -15,8 +38,9 @@ data class Rational(val numerator: BigInteger, val denominator: BigInteger) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
+        val normalizedThis: Rational = normalize(this )
         val normalizedOther: Rational = normalize(other as Rational)
-        return (this.numerator == normalizedOther.numerator && this.denominator == normalizedOther.denominator)
+        return (normalizedThis.numerator == normalizedOther.numerator && normalizedThis.denominator == normalizedOther.denominator)
     }
 
     override fun hashCode(): Int {
@@ -123,14 +147,22 @@ fun main() {
     println((2 divBy 1).toString() == "2")
     println((-2 divBy 4).toString() == "-1/2")
     println("117/1098".toRational().toString() == "13/122")
+    println("23/1".toRational().toString() == "23")
 
     val twoThirds = 2 divBy 3
-//    println(half < twoThirds)
+    println(half < twoThirds)
 
-//    println(half in third..twoThirds)
+    println(half in third..twoThirds)
 
     println(2000000000L divBy 4000000000L == 1 divBy 2)
 
     println("912016490186296920119201192141970416029".toBigInteger() divBy
             "1824032980372593840238402384283940832058".toBigInteger() == 1 divBy 2)
+
+    println((normalize("-578136305229133309744/-966904753430936619984".toRational())).toString())
+    println((normalize("31/-541".toRational())).toString())
+    println((normalize("-1042438361047144366998/59812037109262381713".toRational())).toString())
+    println((normalize("1076615241954175969826/-61773005685895342531".toRational())).toString())
+    println("-1042438361047144366998/59812037109262381713".toRational() == "1076615241954175969826/-61773005685895342531".toRational())
+    println("17/382231".toRational() == "-17/382231".toRational())
 }
