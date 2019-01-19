@@ -3,51 +3,58 @@ package rationals
 import java.math.BigInteger
 
 data class Rational(val numerator: BigInteger, val denominator: BigInteger) {
-    override fun toString(): String = numerator.toString() + "/" + denominator.toString()
+    override fun toString(): String {
+
+        val (normNumerator, normDenominator) = normalize(this)
+
+        return when (normDenominator) {
+            BigInteger.ONE -> normNumerator.toString()
+            else -> normNumerator.toString() + "/" + normDenominator.toString()
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
-        if(this === other) return true
+        if (this === other) return true
         val normalizedOther: Rational = normalize(other as Rational)
         return (this.numerator == normalizedOther.numerator && this.denominator == normalizedOther.denominator)
+    }
+
+    override fun hashCode(): Int {
+        var result = numerator.hashCode()
+        result = 31 * result + denominator.hashCode()
+        return result
     }
 }
 
 infix fun Number.divBy(other: Number): Rational {
-    lateinit var num: BigInteger
-    lateinit var denom: BigInteger
-    when {
-        this is Int -> num = this.toBigInteger()
-        this is Long -> num = this.toBigInteger()
-        else -> num = this as BigInteger
+    val num: BigInteger = when {
+        this is Int -> this.toBigInteger()
+        this is Long -> this.toBigInteger()
+        else -> this as BigInteger
+    }
+    val denom: BigInteger = when (other) {
+        is Int -> other.toBigInteger()
+        is Long -> other.toBigInteger()
+        else -> other as BigInteger
     }
 
-    when (other) {
-        is Int -> denom = other.toBigInteger()
-        is Long -> denom = other.toBigInteger()
-        else -> denom = other as BigInteger
-    }
-    return Rational(num, denom)
+    return normalize(Rational(num, denom))
 }
 
-fun String.toRational(): Rational =
-        Rational(substringBefore('/').toBigInteger(), substringAfter('/').toBigInteger())
-
-fun hcf(first: BigInteger, second: BigInteger): BigInteger {
-    when {
-        second != BigInteger.ZERO -> return (hcf(second, first % second))
-        else -> return first
-    }
+fun String.toRational(): Rational = when {
+    !this.contains("/") -> Rational(this.toBigInteger(), "1".toBigInteger())
+    else -> Rational(substringBefore('/').toBigInteger(), substringAfter('/').toBigInteger())
 }
 
-fun lcm(first: BigInteger, second: BigInteger): BigInteger = (first * second) / hcf(first, second)
+fun lcm(first: BigInteger, second: BigInteger): BigInteger = (first * second) / first.gcd(second)
 
 fun normalize(r: Rational): Rational {
-    val num: BigInteger
-    when {
-        r.numerator < BigInteger.ZERO -> num = -r.numerator
-        else -> num = r.numerator
+    val num: BigInteger = when {
+        r.numerator < BigInteger.ZERO -> -r.numerator
+        else -> r.numerator
     }
 
-    val hcf = hcf(num, r.denominator)
+    val hcf = num.gcd(r.denominator)
     return Rational(r.numerator / hcf, r.denominator / hcf)
 }
 
@@ -84,10 +91,10 @@ operator fun Rational.minus(other: Rational): Rational {
 }
 
 operator fun Rational.times(other: Rational): Rational =
-    normalize(Rational(this.numerator * other.numerator, this.denominator * other.denominator))
+        normalize(Rational(this.numerator * other.numerator, this.denominator * other.denominator))
 
 operator fun Rational.div(other: Rational): Rational =
-    normalize(Rational(this.numerator * other.denominator, this.denominator * other.numerator))
+        normalize(Rational(this.numerator * other.denominator, this.denominator * other.numerator))
 
 operator fun Rational.unaryMinus(): Rational {
     val normalizedFraction = normalize(this)
