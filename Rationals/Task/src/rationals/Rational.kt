@@ -4,24 +4,50 @@ import java.math.BigInteger
 
 data class Rational(val numerator: BigInteger, val denominator: BigInteger) {
     override fun toString(): String = numerator.toString() + "/" + denominator.toString()
+    override fun equals(other: Any?): Boolean {
+        if(this === other) return true
+        val normalizedOther: Rational = normalize(other as Rational)
+        return (this.numerator == normalizedOther.numerator && this.denominator == normalizedOther.denominator)
+    }
 }
 
-infix fun Number.divBy(other: Number): Rational = Rational(this as BigInteger, other as BigInteger)
+infix fun Number.divBy(other: Number): Rational {
+    lateinit var num: BigInteger
+    lateinit var denom: BigInteger
+    when {
+        this is Int -> num = this.toBigInteger()
+        this is Long -> num = this.toBigInteger()
+        else -> num = this as BigInteger
+    }
+
+    when (other) {
+        is Int -> denom = other.toBigInteger()
+        is Long -> denom = other.toBigInteger()
+        else -> denom = other as BigInteger
+    }
+    return Rational(num, denom)
+}
 
 fun String.toRational(): Rational =
         Rational(substringBefore('/').toBigInteger(), substringAfter('/').toBigInteger())
 
 fun hcf(first: BigInteger, second: BigInteger): BigInteger {
-    if (second != BigInteger.ZERO)
-        return (hcf(second, first % second))
-    else
-        return first
+    when {
+        second != BigInteger.ZERO -> return (hcf(second, first % second))
+        else -> return first
+    }
 }
 
 fun lcm(first: BigInteger, second: BigInteger): BigInteger = (first * second) / hcf(first, second)
 
 fun normalize(r: Rational): Rational {
-    val hcf = hcf(r.numerator, r.denominator)
+    val num: BigInteger
+    when {
+        r.numerator < BigInteger.ZERO -> num = -r.numerator
+        else -> num = r.numerator
+    }
+
+    val hcf = hcf(num, r.denominator)
     return Rational(r.numerator / hcf, r.denominator / hcf)
 }
 
@@ -57,6 +83,17 @@ operator fun Rational.minus(other: Rational): Rational {
             lcmDenominators))
 }
 
+operator fun Rational.times(other: Rational): Rational =
+    normalize(Rational(this.numerator * other.numerator, this.denominator * other.denominator))
+
+operator fun Rational.div(other: Rational): Rational =
+    normalize(Rational(this.numerator * other.denominator, this.denominator * other.numerator))
+
+operator fun Rational.unaryMinus(): Rational {
+    val normalizedFraction = normalize(this)
+    return Rational(-normalizedFraction.numerator, normalizedFraction.denominator)
+}
+
 fun main() {
     val half = 1 divBy 2
     val third = 1 divBy 3
@@ -81,9 +118,9 @@ fun main() {
     println("117/1098".toRational().toString() == "13/122")
 
     val twoThirds = 2 divBy 3
-    println(half < twoThirds)
+//    println(half < twoThirds)
 
-    println(half in third..twoThirds)
+//    println(half in third..twoThirds)
 
     println(2000000000L divBy 4000000000L == 1 divBy 2)
 
