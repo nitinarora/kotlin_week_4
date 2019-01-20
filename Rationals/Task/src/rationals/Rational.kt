@@ -164,5 +164,6 @@ fun main() {
     println((normalize("-1042438361047144366998/59812037109262381713".toRational())).toString())
     println((normalize("1076615241954175969826/-61773005685895342531".toRational())).toString())
     println("-1042438361047144366998/59812037109262381713".toRational() == "1076615241954175969826/-61773005685895342531".toRational())
-    println("17/382231".toRational() == "-17/382231".toRational())
+    println("17/382231".toRational() != "-17/382231".toRational())
+    println("17/-382231".toRational() == "-17/382231".toRational())
 }
