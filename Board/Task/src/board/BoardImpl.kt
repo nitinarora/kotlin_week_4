@@ -33,49 +33,51 @@ fun createSquareBoard(width: Int): SquareBoard = object : SquareBoard {
     }
 
     override fun getRow(i: Int, jRange: IntProgression): List<Cell> {
-        val tillRange: Int
-
-
-        when {
-            jRange.step < 0 -> tillRange = if (jRange.first > width) width else jRange.first
-            else -> tillRange = if (jRange.last > width) width else jRange.last
-        }
-
-        val filter: List<Cell> = cellStore.toList().filter { it.i == i && it.j in 1..tillRange }
-
         return when {
-            jRange.step < 0 -> filter.sortedByDescending({ cell -> cell.j })
-            else -> filter
+            jRange.step < 0 -> {
+                if (jRange.first > width) {
+                    cellStore.toList().filter { it.i == i && it.j in jRange.last..width }.sortedByDescending { it.j }
+                } else
+                    cellStore.toList().filter { it.i == i && it.j in jRange.last..jRange.first }.sortedByDescending { it.j }
+            }
+            else -> {
+                if (jRange.last > width) {
+                    cellStore.toList().filter { it.i == i && it.j in jRange.first..width }
+                } else
+                    cellStore.toList().filter { it.i == i && it.j in jRange.first..jRange.last }
+            }
+
         }
     }
 
-    override fun getColumn(iRange: IntProgression, j: Int): List<Cell> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun Cell.getNeighbour(direction: Direction): Cell? {
-        val i = this.i
-        val j = this.j
-
-        when (direction) {
-            UP -> {
-                if (j == 1) return null
-                return getCell(i, j - 1)
-            }
-            DOWN -> {
-                if (j < width) return Cell(i, j + 1)
-                return null
-            }
-            LEFT -> {
-                if (i == 1) return null
-                return Cell(i - 1, j)
-            }
-            RIGHT -> {
-                if (i < width) return Cell(i + 1, j)
-                return null
-            }
+override fun getColumn(iRange: IntProgression, j: Int): List<Cell> {
+    return when {
+        iRange.step < 0 -> {
+            if (iRange.first > width) {
+                cellStore.toList().filter { it.i in iRange.last..width && it.j == j  }.sortedByDescending { it.i }
+            } else
+                cellStore.toList().filter { it.i in iRange.last..iRange.first && it.j == j }.sortedByDescending { it.i }
+        }
+        else -> {
+            if (iRange.last > width) {
+                cellStore.toList().filter { it.i in iRange.first..width && it.j == j }
+            } else
+                cellStore.toList().filter { it.i in iRange.first..iRange.last  && it.j == j}
         }
     }
+}
+
+override fun Cell.getNeighbour(direction: Direction): Cell? {
+    val i = this.i
+    val j = this.j
+
+    return when (direction) {
+        UP -> getCellOrNull(i - 1, j)
+        DOWN -> getCellOrNull(i + 1, j)
+        LEFT -> getCellOrNull(i, j - 1)
+        RIGHT -> getCellOrNull(i, j + 1)
+    }
+}
 
 }
 
@@ -83,18 +85,22 @@ fun main() {
     val sb = createSquareBoard(2)
 //    println(sb.getCell(1,2))
 //    println(sb.getCellOrNull(2,2))
+//    println(sb.getCellOrNull(0,2))
 //    println(sb.getCellOrNull(3,2))
 //    println(sb.getCell(3,2))
 //    println(sb.getAllCells())
 //    println(sb.getRow(1, 1..1))
 //    println(sb.getRow(1, 1..2))
 //    println(sb.getRow(1, 1..3))
-    println(sb.getRow(1, 2 downTo 1))
-    println(sb.getRow(1, 3 downTo 1))
-    println(sb.getRow(2, 1..1))
-    println(sb.getRow(2, 1..2))
-    println(sb.getRow(2, 2 downTo 1))
-    println(sb.getRow(2, 3 downTo 1))
+//    println(sb.getRow(1, 2 downTo 1))
+//    println(sb.getRow(1, 3 downTo 1))
+//    println(sb.getRow(2, 1..1))
+//    println(sb.getRow(2, 1..2))
+//    println(sb.getRow(2, 2 downTo 1))
+//    println(sb.getRow(2, 3 downTo 1))
+    val cell = sb.getCellOrNull(1, 1)
+//    println(cell.get)
+
 }
 
 fun <T> createGameBoard(width: Int): GameBoard<T> = object : GameBoard<T> {

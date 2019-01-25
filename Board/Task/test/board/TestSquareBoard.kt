@@ -42,10 +42,66 @@ class TestSquareBoard {
     }
 
     @Test
+    fun testRowReversed2() {
+        val board = createSquareBoard(2)
+        val row = board.getRow(2, 2 downTo 1)
+        Assert.assertEquals("[(2, 2), (2, 1)]", row.toString())
+    }
+
+    @Test
     fun testRowWrongRange() {
         val board = createSquareBoard(2)
         val row = board.getRow(1, 1..10)
         Assert.assertEquals("[(1, 1), (1, 2)]", row.toString())
+    }
+
+    @Test
+    fun testRowWrongRange2() {
+        val board = createSquareBoard(2)
+        val row = board.getRow(1, 10..10)
+        Assert.assertEquals("[]", row.toString())
+    }
+
+    @Test
+    fun testColumn() {
+        val board = createSquareBoard(2)
+        val row = board.getColumn(1..2, 1)
+        Assert.assertEquals("[(1, 1), (2, 1)]", row.toString())
+    }
+
+    @Test
+    fun testColumnReversed() {
+        val board = createSquareBoard(2)
+        val row = board.getColumn(2 downTo 1, 1)
+        Assert.assertEquals("[(2, 1), (1, 1)]", row.toString())
+    }
+
+    @Test
+    fun testColumnWrongRange() {
+        val board = createSquareBoard(2)
+        val row = board.getColumn(1..10, 1)
+        Assert.assertEquals("[(1, 1), (2, 1)]", row.toString())
+    }
+
+    @Test
+    fun testColumnWrongRangeReversed() {
+        val board = createSquareBoard(2)
+        val row = board.getColumn(10 downTo 1, 1)
+        Assert.assertEquals("[(2, 1), (1, 1)]", row.toString())
+    }
+
+    @Test
+    fun testColumnWrongRangeReversed3() {
+        val board = createSquareBoard(2)
+        val row = board.getColumn(10 downTo 1, 2)
+        Assert.assertEquals("[(2, 2), (1, 2)]", row.toString())
+    }
+
+    @Test
+    fun testColumnWrongRangeReversed2() {
+        val board = createSquareBoard(2)
+        val row = board.getColumn(10..10, 1)
+        Assert.assertEquals("[]", row.toString())
     }
 
     @Test
