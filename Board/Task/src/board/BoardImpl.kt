@@ -98,61 +98,62 @@ fun main() {
 //    println(sb.getRow(2, 1..2))
 //    println(sb.getRow(2, 2 downTo 1))
 //    println(sb.getRow(2, 3 downTo 1))
-    val cell = sb.getCellOrNull(1, 1)
-//    println(cell.get)
+
+    val gb = createGameBoard<Char>(2)
+    println(gb.getAllCells())
+
+
+
 
 }
 
 fun <T> createGameBoard(width: Int): GameBoard<T> = object : GameBoard<T> {
-    override fun get(cell: Cell): T? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+    private var cellStore: List<Cell>
+    private val sb: SquareBoard
+    private var cellValueMap:MutableMap<Cell, T?> = mutableMapOf()
+
+    init {
+        sb = createSquareBoard(width)
+        cellStore = sb.getAllCells() as List<Cell>
+
+        for (cell in cellStore) {
+            cellValueMap.put(cell, null)
+        }
     }
+
+    override fun get(cell: Cell): T? = cellValueMap.get(cell)
 
     override fun set(cell: Cell, value: T?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        cellValueMap.put(cell, value)
     }
 
-    override fun filter(predicate: (T?) -> Boolean): Collection<Cell> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun filter(predicate: (T?) -> Boolean): Collection<Cell> =
+        cellValueMap.filter{ predicate(it.value) }.keys
 
-    override fun find(predicate: (T?) -> Boolean): Cell? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun find(predicate: (T?) -> Boolean): Cell? = this.filter(predicate).firstOrNull()
 
     override fun any(predicate: (T?) -> Boolean): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+       return cellValueMap.any{predicate(it.value)}
     }
 
     override fun all(predicate: (T?) -> Boolean): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return cellValueMap.all { predicate(it.value) }
     }
 
     override val width: Int
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+        get() = sb.width
 
-    override fun getCellOrNull(i: Int, j: Int): Cell? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getCellOrNull(i: Int, j: Int): Cell? = sb.getCellOrNull(i,j)
 
-    override fun getCell(i: Int, j: Int): Cell {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getCell(i: Int, j: Int): Cell = sb.getCell(i,j)
 
-    override fun getAllCells(): Collection<Cell> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getAllCells(): Collection<Cell>  = sb.getAllCells()
 
-    override fun getRow(i: Int, jRange: IntProgression): List<Cell> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getRow(i: Int, jRange: IntProgression): List<Cell>  = sb.getRow(i, jRange)
 
-    override fun getColumn(iRange: IntProgression, j: Int): List<Cell> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getColumn(iRange: IntProgression, j: Int): List<Cell> = sb.getColumn(iRange, j)
 
-    override fun Cell.getNeighbour(direction: Direction): Cell? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun Cell.getNeighbour(direction: Direction): Cell? = sb.getCell(this.i, this.j).getNeighbour(direction)
 }
 
